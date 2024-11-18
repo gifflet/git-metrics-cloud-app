@@ -31,8 +31,8 @@ export default function BadgePage() {
         const imageUrl = `${GitHubService.BASE_URL}/${username}/badge`;
         setBadgeData({
           imageUrl,
-          markdownCode: `[![GitHub Stats](${imageUrl})](${GitHubService.BASE_URL}/${username})`,
-          htmlCode: `<a href="${GitHubService.BASE_URL}/${username}"><img src="${imageUrl}" alt="GitHub Stats"></a>`
+          markdownCode: `[![GitHub Stats](${imageUrl})](https://github.com/${username})`,
+          htmlCode: `<a href="https://github.com/${username}"><img src="${imageUrl}" alt="GitHub Stats"></a>`
         });
       } catch (err) {
         setError('Failed to load user badge');
