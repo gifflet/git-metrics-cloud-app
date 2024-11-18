@@ -13,7 +13,7 @@ A modern web application that generates beautiful GitHub statistics badges and r
 
 ## 🚀 Demo
 
-Visit the live application at: [github-stats-cloud.pages.dev](https://github-stats-cloud.pages.dev)
+Visit the live application at [this link](https://git-metrics-cloud-app.pages.dev).
 
 ## 🛠️ Tech Stack
 
