@@ -27,7 +27,7 @@ export default function BadgePage() {
   useEffect(() => {
     const fetchBadgeData = async () => {
       try {
-        const data = await GitHubService.getUserStats(username as string);
+        const data = await GitHubService.getUserRepositories(username as string);
         const imageUrl = `${GitHubService.BASE_URL}/${username}/badge`;
         setBadgeData({
           imageUrl,

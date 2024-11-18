@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
-import { GitHubService } from '@/services/github';
+import { GitHubService, PaginationInfo } from '@/services/github';
 
 export const runtime = 'edge';
 
@@ -22,12 +22,16 @@ export default function UserPage() {
   const [repositories, setRepositories] = useState<Repository[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pagination, setPagination] = useState<PaginationInfo | null>(null);
 
   useEffect(() => {
     const fetchUserData = async () => {
       try {
-        const data = await GitHubService.getUserStats(username as string);
-        setRepositories(data.repositories || []);
+        setIsLoading(true);
+        const data = await GitHubService.getUserRepositories(username as string, currentPage);
+        setRepositories(data.repositories ?? []);
+        setPagination(data.pagination);
       } catch (err) {
         setError('Failed to load user repositories');
         console.error(err);
@@ -37,7 +41,7 @@ export default function UserPage() {
     };
 
     fetchUserData();
-  }, [username]);
+  }, [username, currentPage]);
 
   if (isLoading) {
     return (
@@ -54,6 +58,32 @@ export default function UserPage() {
       </div>
     );
   }
+
+  const PaginationControls = () => (
+    <div className="mt-8 flex justify-center space-x-4">
+      <button
+        onClick={() => setCurrentPage(prev => prev - 1)}
+        disabled={!pagination?.has_previous_page}
+        className="px-4 py-2 rounded-lg border border-gray-200 dark:border-gray-700
+                 disabled:opacity-50 disabled:cursor-not-allowed
+                 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+      >
+        Previous
+      </button>
+      <span className="px-4 py-2 text-gray-600 dark:text-gray-400">
+        Page {pagination?.current_page}
+      </span>
+      <button
+        onClick={() => setCurrentPage(prev => prev + 1)}
+        disabled={!pagination?.has_next_page}
+        className="px-4 py-2 rounded-lg border border-gray-200 dark:border-gray-700
+                 disabled:opacity-50 disabled:cursor-not-allowed
+                 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+      >
+        Next
+      </button>
+    </div>
+  );
 
   return (
     <main className="min-h-screen p-8 bg-white dark:bg-gray-900">
@@ -137,6 +167,8 @@ export default function UserPage() {
             </div>
           ))}
         </div>
+
+        {pagination && <PaginationControls />}
       </div>
     </main>
   );

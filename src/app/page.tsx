@@ -18,7 +18,7 @@ export default function Home() {
     if (username.trim()) {
       setIsLoading(true);
       try {
-        await GitHubService.getUserStats(username.trim());
+        await GitHubService.getUserRepositories(username.trim());
         router.push(
           searchOption === 'repositories' 
             ? `/user/${username}` 

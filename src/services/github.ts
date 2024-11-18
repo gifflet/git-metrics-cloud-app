@@ -1,13 +1,16 @@
 import { config } from '@/config';
 
-interface GitHubUserStats {
+export interface PaginationInfo {
+  current_page: number;
+  per_page: number;
+  has_next_page: boolean;
+  has_previous_page: boolean;
+}
+
+interface GitHubResponse {
   repositories?: Repository[];
   username: string;
-  stats: {
-    totalStars: number;
-    totalForks: number;
-    totalRepos: number;
-  };
+  pagination: PaginationInfo;
 }
 
 interface Repository {
@@ -24,18 +27,18 @@ interface Repository {
 export class GitHubService {
   static readonly BASE_URL = config.api.baseUrl;
 
-  static async getUserStats(username: string): Promise<GitHubUserStats> {
+  static async getUserRepositories(username: string, page: number = 1): Promise<GitHubResponse> {
     try {
-      const response = await fetch(`${this.BASE_URL}/${username}`);
+      const response = await fetch(`${this.BASE_URL}/${username}/repositories?page=${page}`);
       
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
       
       const data = await response.json();
-      return data as GitHubUserStats;
+      return data as GitHubResponse;
     } catch (error) {
-      console.error('Error fetching user stats:', error);
+      console.error('Error fetching user repositories:', error);
       throw error;
     }
   }
