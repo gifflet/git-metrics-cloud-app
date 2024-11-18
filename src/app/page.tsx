@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { GitHubService } from '@/services/github';
@@ -11,7 +11,20 @@ export default function Home() {
   const [username, setUsername] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [searchOption, setSearchOption] = useState<SearchOption>('repositories');
+  const [isDarkMode, setIsDarkMode] = useState(false);
   const router = useRouter();
+
+  useEffect(() => {
+    // Verifica o tema inicial
+    const darkModeMediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+    setIsDarkMode(darkModeMediaQuery.matches);
+
+    // Adiciona listener para mudanças no tema
+    const handleChange = (e: MediaQueryListEvent) => setIsDarkMode(e.matches);
+    darkModeMediaQuery.addEventListener('change', handleChange);
+
+    return () => darkModeMediaQuery.removeEventListener('change', handleChange);
+  }, []);
 
   const handleSearch = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -37,7 +50,7 @@ export default function Home() {
       <div className="w-full max-w-md text-center space-y-8">
         <div className="flex justify-center mb-8">
           <Image
-            src="/github-mark.svg"
+            src={isDarkMode ? "/github-mark-light.svg" : "/github-mark-dark.svg"}
             alt="GitHub Logo"
             width={100}
             height={100}
