@@ -7,11 +7,24 @@ import { GitHubService } from '@/services/github';
 
 type SearchOption = 'repositories' | 'badge';
 
+interface BadgeOptions {
+  show_language: boolean;
+  show_stars: boolean;
+  show_forks: boolean;
+  show_repos: boolean;
+}
+
 export default function Home() {
   const [username, setUsername] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [searchOption, setSearchOption] = useState<SearchOption>('repositories');
   const [isDarkMode, setIsDarkMode] = useState(false);
+  const [badgeOptions, setBadgeOptions] = useState<BadgeOptions>({
+    show_language: true,
+    show_stars: true,
+    show_forks: true,
+    show_repos: true,
+  });
   const router = useRouter();
 
   useEffect(() => {
@@ -32,17 +45,28 @@ export default function Home() {
       setIsLoading(true);
       try {
         await GitHubService.getUserRepositories(username.trim());
-        router.push(
-          searchOption === 'repositories' 
-            ? `/user/${username}` 
-            : `/badge/${username}`
-        );
+        if (searchOption === 'repositories') {
+          router.push(`/user/${username}`);
+        } else {
+          const params = new URLSearchParams();
+          Object.entries(badgeOptions).forEach(([key, value]) => {
+            if (!value) params.append(key, 'false');
+          });
+          router.push(`/badge/${username}${params.toString() ? `?${params.toString()}` : ''}`);
+        }
       } catch (error) {
         console.error('Error:', error);
       } finally {
         setIsLoading(false);
       }
     }
+  };
+
+  const toggleOption = (option: keyof BadgeOptions) => {
+    setBadgeOptions(prev => ({
+      ...prev,
+      [option]: !prev[option]
+    }));
   };
 
   return (
@@ -175,6 +199,72 @@ export default function Home() {
               </div>
             </button>
           </div>
+
+          {searchOption === 'badge' && (
+            <div className="space-y-4 p-4 border-2 rounded-lg border-gray-200 dark:border-gray-700">
+              <h3 className="font-medium text-gray-900 dark:text-white">
+                Badge Options
+              </h3>
+              <div className="grid grid-cols-2 gap-3">
+                <label className="flex items-center space-x-2 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={badgeOptions.show_language}
+                    onChange={() => toggleOption('show_language')}
+                    className="w-4 h-4 text-blue-600 rounded border-gray-300 
+                             focus:ring-blue-500 dark:focus:ring-blue-600 
+                             dark:ring-offset-gray-800 dark:bg-gray-700 
+                             dark:border-gray-600"
+                  />
+                  <span className="text-sm text-gray-700 dark:text-gray-300">
+                    Show Language
+                  </span>
+                </label>
+                <label className="flex items-center space-x-2 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={badgeOptions.show_stars}
+                    onChange={() => toggleOption('show_stars')}
+                    className="w-4 h-4 text-blue-600 rounded border-gray-300 
+                             focus:ring-blue-500 dark:focus:ring-blue-600 
+                             dark:ring-offset-gray-800 dark:bg-gray-700 
+                             dark:border-gray-600"
+                  />
+                  <span className="text-sm text-gray-700 dark:text-gray-300">
+                    Show Stars
+                  </span>
+                </label>
+                <label className="flex items-center space-x-2 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={badgeOptions.show_forks}
+                    onChange={() => toggleOption('show_forks')}
+                    className="w-4 h-4 text-blue-600 rounded border-gray-300 
+                             focus:ring-blue-500 dark:focus:ring-blue-600 
+                             dark:ring-offset-gray-800 dark:bg-gray-700 
+                             dark:border-gray-600"
+                  />
+                  <span className="text-sm text-gray-700 dark:text-gray-300">
+                    Show Forks
+                  </span>
+                </label>
+                <label className="flex items-center space-x-2 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={badgeOptions.show_repos}
+                    onChange={() => toggleOption('show_repos')}
+                    className="w-4 h-4 text-blue-600 rounded border-gray-300 
+                             focus:ring-blue-500 dark:focus:ring-blue-600 
+                             dark:ring-offset-gray-800 dark:bg-gray-700 
+                             dark:border-gray-600"
+                  />
+                  <span className="text-sm text-gray-700 dark:text-gray-300">
+                    Show Repos
+                  </span>
+                </label>
+              </div>
+            </div>
+          )}
         </form>
       </div>
     </main>

@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useParams } from 'next/navigation';
+import { useParams, useSearchParams } from 'next/navigation';
 import { GitHubService } from '@/services/github';
 import Image from 'next/image';
 
@@ -15,6 +15,7 @@ interface BadgeData {
 
 export default function BadgePage() {
   const { username } = useParams();
+  const searchParams = useSearchParams();
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [badgeData, setBadgeData] = useState<BadgeData>({
@@ -28,7 +29,8 @@ export default function BadgePage() {
     const fetchBadgeData = async () => {
       try {
         const data = await GitHubService.getUserRepositories(username as string);
-        const imageUrl = `${GitHubService.BASE_URL}/${username}/badge`;
+        const queryString = searchParams.toString();
+        const imageUrl = `${GitHubService.BASE_URL}/${username}/badge${queryString ? `?${queryString}` : ''}`;
         setBadgeData({
           imageUrl,
           markdownCode: `[![GitHub Stats](${imageUrl})](https://github.com/${username})`,
@@ -43,7 +45,7 @@ export default function BadgePage() {
     };
 
     fetchBadgeData();
-  }, [username]);
+  }, [username, searchParams]);
 
   const copyToClipboard = async (text: string, field: string) => {
     try {
